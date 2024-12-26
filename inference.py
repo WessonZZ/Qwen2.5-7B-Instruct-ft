@@ -1,5 +1,5 @@
 # -------------------------------------------------------------
-# reference with fine-tuned model
+# inference with fine-tuned model
 # -------------------------------------------------------------
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
