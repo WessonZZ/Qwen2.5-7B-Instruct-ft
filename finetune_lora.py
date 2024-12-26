@@ -15,7 +15,7 @@ if not os.path.exists(out_dir):
     os.makedirs(out_dir, exist_ok=True)
 
 BASE_DIR = 'Qwen2.5-7B-ft'
-model_dir = os.path.join(BASE_DIR, 'Qwen2.5-7B-Instruct')
+model_dir = 'Qwen2.5-7B-Instruct'
 data_dir = 'dataset'
 train_dir = os.path.join(data_dir, 'train.json')
 val_dir = os.path.join(data_dir, 'val.json')
@@ -62,7 +62,7 @@ args = TrainingArguments(
     disable_tqdm=False,
     bf16=True, #fp16=True
     deepspeed=None, #配置deepspeed
-    load_best_model_at_end = True,
+    # load_best_model_at_end = True,
     local_rank=os.getenv('LOCAL_RANK', -1),
     ddp_find_unused_parameters=False  # 禁用 DDP 未使用参数检查
 )

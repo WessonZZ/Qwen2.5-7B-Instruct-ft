@@ -3,9 +3,23 @@
 # -------------------------------------------------------------
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from peft import PeftModel
 import torch
 
 import os
+
+def merge_save(merge, base_dir, lora_dir, device, Tokenizer):
+    """if merge lora and original model and save
+    """
+    if merge:
+        model = AutoModelForCausalLM.from_pretrained(base_dir, torch_dtype=torch.bfloat16, device_map=device, trust_remote_code=True)
+        model = PeftModel.from_pretrained(model, lora_dir)
+        merged_model = model.merge_and_unload()
+        merged_model.save_pretrained("output_qwen_merged", max_shard_size="2048MB", safe_serialization=True) #adjust max_shard_size
+        Tokenizer.save_pretrained("output_qwen_merged")
+        return "output_qwen_merged"
+    else:
+        return None
 
 def predict(text, model, tokenizer, device):
     messages = [
@@ -27,17 +41,14 @@ def predict(text, model, tokenizer, device):
 
     return tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
 
-def main(ft = True):
-    model_dir = 'Qwen2.5-7B-Instruct'
-    ft_model_dir = 'output-lora'
-    Tokenizer = AutoTokenizer.from_pretrained(model_dir, trust_remote_code=True)
+def main(ft, model_dir, device, Tokenizer):
+
     if ft: #finetuned model
         print("---------fine-tuned model-----------")
-        model = AutoModelForCausalLM.from_pretrained(ft_model_dir, trust_remote_code=True, torch_dtype=torch.bfloat16)
+        model = AutoModelForCausalLM.from_pretrained(model_dir, trust_remote_code=True, torch_dtype=torch.bfloat16)
     else: #un-finetuned model
         print("---------un-fine-tuned model-----------")
         model = AutoModelForCausalLM.from_pretrained(model_dir, trust_remote_code=True, torch_dtype=torch.bfloat16)
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
     Text = [
@@ -51,9 +62,17 @@ def main(ft = True):
     for text in Text:
         response = predict(text, model, Tokenizer, device)
         print("----------------------------------")
-        print(f"Input: {text}\nResponse: {response}")
+        print(f"{response}")
         
 if __name__=="__main__":
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    merge = True
+    base_dir = 'Qwen2.5-7B-Instruct'
+    ft_model_dir = 'output-lora/checkpoint-1'
+    Tokenizer = AutoTokenizer.from_pretrained(base_dir, trust_remote_code=True)
+    model_dir = 'Qwen2.5-7B-Instruct' if not merge else merge_save(merge, base_dir, ft_model_dir, device, Tokenizer)
     ft = True
-    main(ft)
+    if merge:
+        Tokenizer = AutoTokenizer.from_pretrained(model_dir, trust_remote_code=True)
+    main(ft, model_dir, device, Tokenizer)
     

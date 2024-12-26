@@ -1,0 +1,5 @@
+transformers==4.47.1
+torch==2.5.1
+numpy==1.23.5
+peft==0.14.0
+accelerate==1.2.1
