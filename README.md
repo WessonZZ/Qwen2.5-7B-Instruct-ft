@@ -30,6 +30,7 @@ python add_data.py
 ```bash
 python finetune_lora.py   #single GPU
 torchrun --nproc_per_node=2 --master_port=12345 finetune_lora.py   #2 GPUs
+python finetune_lora_ds.py  #deepspeed
 ```
 3. inference
 ```bash
