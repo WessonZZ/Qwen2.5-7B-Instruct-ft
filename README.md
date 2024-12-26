@@ -15,7 +15,7 @@ The repository contains some basic scripts and datasets to fine-tune Qwen2.5-7B-
 Follow below instructions to fine-tune your own LLM.
 
 Before running these scripts, you should create a new folder "dataset" to contains your dataset.
-
+And you need to download your LLM and put it in the folder "model_dir".
 
 0. install necessary package
 ```bash
